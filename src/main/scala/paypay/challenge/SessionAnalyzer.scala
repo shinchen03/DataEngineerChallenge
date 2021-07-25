@@ -34,12 +34,15 @@ object SessionAnalyzer {
         StructField("sslProtocol", StringType, true)
       )
     )
+
+    // Since this tested in the Azure Databricks, I read the file from DBFS here
     val df_raw = spark.read
       .option("header", "false")
       .option("inferSchema", false)
       .option("delimiter", " ")
       .schema(rawSchema)
       .csv("dbfs:/FileStore/2015_07_22_mktplace_shop_web_log_sample_log.gz")
+    // Define the interval to 15 min
     val df = getSessionizedDf(df_raw, spark, 15)
     val df_task1 = getAggregatePageHits(df, spark)
     val df_task2 = getAverageSessionTime(df, spark)
@@ -81,6 +84,7 @@ object SessionAnalyzer {
           col("prevTimestamp")
         )
       )
+      // Every access after {interval} min since last time, we define it as a new session.
       .withColumn("sessionId", unix_timestamp)
       .withColumn(
         "isNewSession",
