@@ -140,6 +140,7 @@ object SessionAnalyzer {
 
     // Group by sessionId and get the session start timestamp and session end timestamp, to calculate the sessionTime.
     val df_task2 = sessionizeddf
+      .filter(col("elbStatusCode") < 400)
       .groupBy("sessionId", "userAgent")
       .agg(
         max("timestamp").alias("sessionEnd"),
@@ -163,6 +164,7 @@ object SessionAnalyzer {
 
     // Count distinct urls during a session
     val df_task3 = sessionizeddf
+      .filter(col("elbStatusCode") < 400)
       .groupBy("sessionId", "userAgent")
       .agg(countDistinct(col("url")).alias("uniqueVisitURL"))
       .orderBy(desc("uniqueVisitURL"))
@@ -177,6 +179,7 @@ object SessionAnalyzer {
 
     // Calculate the session time of each sessionId, and order by the sessionTime, select the user to get the most engaged users.
     val df_task4 = sessionizeddf
+      .filter(col("elbStatusCode") < 400)
       .groupBy("sessionId", "userAgent")
       .agg(
         max("timestamp").alias("sessionEnd"),
